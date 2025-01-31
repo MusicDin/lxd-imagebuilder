@@ -150,6 +150,28 @@ func (p *ProductMock) Create(t *testing.T, rootDir string) ProductMock {
 	return *p
 }
 
+// Create creates the mocked product directory structure in the given directory.
+// According to the mock's configuration, product catalog and config are created.
+func (p *ProductMock) CreateOnPath(rootDir string) error {
+	p.rootDir = rootDir
+
+	// Ensure product dir exists.
+	err := os.MkdirAll(p.AbsPath(), os.ModePerm)
+	if err != nil {
+		return err
+	}
+
+	// Create versions.
+	for _, v := range p.versions {
+		err := v.CreateOnPath(p.AbsPath())
+		if err != nil {
+			return err
+		}
+	}
+
+	return nil
+}
+
 // StreamName returns the name of the product's stream.
 func (p ProductMock) StreamName() string {
 	return strings.SplitN(p.relPath, "/", 2)[0]
@@ -246,6 +268,45 @@ func (v *VersionMock) Create(t *testing.T, rootDir string) VersionMock {
 	return *v
 }
 
+// Create creates the mocked version directory structure in the given directory.
+func (v *VersionMock) CreateOnPath(rootDir string) error {
+	v.rootDir = rootDir
+
+	// Ensure version dir exists.
+	err := os.MkdirAll(v.AbsPath(), os.ModePerm)
+	if err != nil {
+		return err
+	}
+
+	// Create version items.
+	for _, item := range v.items {
+		err := item.CreateOnPath(v.AbsPath())
+		if err != nil {
+			return err
+		}
+	}
+
+	// Create checsums file.
+	if v.checksums != "" {
+		checksumPath := filepath.Join(v.AbsPath(), stream.FileChecksumSHA256)
+		err = os.WriteFile(checksumPath, []byte(v.checksums), os.ModePerm)
+		if err != nil {
+			return err
+		}
+	}
+
+	// Write image config.
+	if v.imageConfig != "" {
+		configPath := filepath.Join(v.AbsPath(), stream.FileImageConfig)
+		err = os.WriteFile(configPath, []byte(v.imageConfig), os.ModePerm)
+		if err != nil {
+			return err
+		}
+	}
+
+	return nil
+}
+
 // WithAge sets age (modification time) of the version contents
 // after version is created.
 func (v VersionMock) WithAge(age time.Duration) VersionMock {
@@ -291,6 +352,25 @@ func (i *ItemMock) Create(t *testing.T, rootDir string) ItemMock {
 	require.NoError(t, err, "Failed to write file")
 
 	return *i
+}
+
+// Create creates a mocked file in the given root directory.
+func (i *ItemMock) CreateOnPath(rootDir string) error {
+	i.rootDir = rootDir
+
+	// Ensure parent dir exists.
+	err := os.MkdirAll(filepath.Dir(i.AbsPath()), os.ModePerm)
+	if err != nil {
+		return err
+	}
+
+	// Write item content.
+	err = os.WriteFile(i.AbsPath(), []byte(i.content), os.ModePerm)
+	if err != nil {
+		return err
+	}
+
+	return nil
 }
 
 // mockProductCatalog creates product catalog from the current directory
