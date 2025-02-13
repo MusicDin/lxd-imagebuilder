@@ -29,13 +29,13 @@ To compile from source, first install the Go programming language, and some othe
 - Debian-based:
     ```
     sudo apt update
-    sudo apt install -y golang-go debootstrap rsync gpg squashfs-tools git make xdelta3
+    sudo apt install -y golang-go debootstrap rsync gpg squashfs-tools git make xdelta3 umoci
     ```
 
 - ArchLinux-based:
     ```
     sudo pacman -Syu
-    sudo pacman -S go debootstrap rsync gnupg squashfs-tools git make xdelta3 --needed
+    sudo pacman -S go debootstrap rsync gnupg squashfs-tools git make xdelta3 umoci --needed
     ```
 
 NOTE: Go 1.23.6 or higher is required. If your package manager doesn't provide a recent enough
