@@ -77,7 +77,7 @@ doc-woke:
 .PHONY: static-analysis
 static-analysis:
 ifeq ($(shell command -v golangci-lint 2> /dev/null),)
-	curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s -- -b $$HOME/go/bin
+	curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s -- -b $$HOME/go/bin v2.1.6
 endif
 	golangci-lint run --timeout 5m
 	run-parts $(shell run-parts -V 2> /dev/null 1> /dev/null && echo -n "--exit-on-error --regex '.sh'") test/lint
